@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Facturio — Factures & devis professionnels en 2 minutes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<style>
+  :root{
+    --bg:#EEF0F4; --panel:#fff; --ink:#1A1D26; --muted:#6B7080; --faint:#A6AAB8;
+    --line:#E4E6ED; --lineSoft:#F1F2F6; --field:#F7F8FA;
+    --accent:#4F46E5; --accentSoft:#ECECFE;
+    --good:#16A34A; --shadow:0 1px 2px rgba(20,25,50,.04),0 10px 30px rgba(20,25,50,.06);
+    --fD:'Plus Jakarta Sans',system-ui,sans-serif; --fB:'Inter',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--fB);-webkit-font-smoothing:antialiased}
+  ::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-thumb{background:#D5D8E0;border-radius:10px}
+  button{font-family:var(--fB);cursor:pointer}
+  input,select,textarea{font-family:var(--fB)}
+
+  /* TOPBAR */
+  .topbar{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.85);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);padding:13px 24px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:11px}
+  .brand .mk{width:38px;height:38px;border-radius:11px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 18px rgba(79,70,229,.35)}
+  .brand .mk svg{width:21px;height:21px}
+  .brand h1{font-family:var(--fD);font-size:18px;font-weight:700;letter-spacing:-.4px}
+  .brand p{font-size:11.5px;color:var(--muted)}
+  .acts{display:flex;gap:9px;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:none;border-radius:10px;padding:9px 15px;font-size:13.5px;font-weight:600;transition:.15s}
+  .btn svg{width:15px;height:15px}
+  .btn-p{background:var(--accent);color:#fff}.btn-p:hover{filter:brightness(1.08)}
+  .btn-g{background:var(--field);color:var(--ink);border:1px solid var(--line)}.btn-g:hover{border-color:var(--accent)}
+
+  .layout{display:grid;grid-template-columns:420px 1fr;gap:0;align-items:start}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr}}
+
+  /* EDITOR */
+  .editor{padding:22px 24px;max-height:calc(100vh - 65px);overflow-y:auto}
+  @media(max-width:1000px){.editor{max-height:none}}
+  .group{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .group h2{font-family:var(--fD);font-size:13.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .group h2 svg{width:15px;height:15px;color:var(--accent)}
+  label{display:block;font-size:11.5px;color:var(--muted);font-weight:500;margin-bottom:5px}
+  .fld{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 11px;font-size:13.5px;background:var(--field);color:var(--ink);outline:none;transition:.15s}
+  .fld:focus{border-color:var(--accent);background:#fff;box-shadow:0 0 0 3px var(--accentSoft)}
+  textarea.fld{resize:vertical;min-height:54px;line-height:1.5}
+  .row{margin-bottom:11px}
+  .r2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+  .seg{display:flex;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:3px;margin-bottom:14px}
+  .seg button{flex:1;border:none;background:transparent;padding:9px;border-radius:8px;font-size:13px;font-weight:600;color:var(--muted)}
+  .seg button.on{background:#fff;color:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+  .logo-up{display:flex;align-items:center;gap:12px}
+  .logo-box{width:54px;height:54px;border-radius:11px;border:1px dashed var(--line);background:var(--field);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+  .logo-box img{width:100%;height:100%;object-fit:contain}
+  .logo-box svg{width:20px;height:20px;color:var(--faint)}
+
+  .items-head{display:grid;grid-template-columns:1fr 56px 78px 64px 28px;gap:7px;font-size:10.5px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:0 2px 6px}
+  .item{display:grid;grid-template-columns:1fr 56px 78px 64px 28px;gap:7px;margin-bottom:8px;align-items:center}
+  .item .fld{padding:8px 9px;font-size:12.5px}
+  .item .del{border:none;background:var(--field);color:var(--faint);border-radius:8px;height:34px;display:flex;align-items:center;justify-content:center}
+  .item .del:hover{background:#FCE9E9;color:#CB4949}.item .del svg{width:15px;height:15px}
+  .add-item{width:100%;border:1px dashed var(--line);background:var(--field);color:var(--accent);border-radius:9px;padding:9px;font-size:13px;font-weight:600;margin-top:4px}
+  .add-item:hover{border-color:var(--accent)}
+
+  .toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0}
+  .toggle-row+.toggle-row{border-top:1px solid var(--lineSoft)}
+  .toggle-row .tl{font-size:13px;font-weight:500}.toggle-row .ts{font-size:11px;color:var(--muted)}
+  .sw{width:42px;height:24px;border-radius:99px;border:none;background:var(--line);position:relative;flex-shrink:0;transition:.2s}
+  .sw.on{background:var(--accent)}.sw span{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:.2s}.sw.on span{left:21px}
+
+  .colors{display:flex;gap:9px;flex-wrap:wrap}
+  .colors button{width:30px;height:30px;border-radius:9px;border:2px solid transparent}
+  .colors button.on{border-color:var(--ink)}
+
+  /* PREVIEW */
+  .preview-wrap{padding:22px;display:flex;justify-content:center;overflow-x:auto}
+  .page{width:210mm;min-height:297mm;background:#fff;box-shadow:0 4px 40px rgba(20,25,50,.14);padding:18mm 16mm;font-size:12px;color:#222;flex-shrink:0}
+  .pg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding-bottom:18px;border-bottom:2px solid var(--accent)}
+  .pg-from{max-width:55%}
+  .pg-logo{max-width:150px;max-height:64px;margin-bottom:10px;display:block}
+  .pg-from .nm{font-family:var(--fD);font-size:17px;font-weight:700;color:#1A1D26}
+  .pg-from .ln{font-size:11px;color:#555;line-height:1.55;white-space:pre-line;margin-top:3px}
+  .pg-doc{text-align:right;flex-shrink:0}
+  .pg-doc .ttl{font-family:var(--fD);font-size:30px;font-weight:800;letter-spacing:-1px;text-transform:uppercase;color:var(--accent);line-height:1}
+  .pg-doc .meta{font-size:11px;color:#555;margin-top:10px;line-height:1.7}
+  .pg-doc .meta b{color:#1A1D26}
+  .pg-to{margin:22px 0 18px}
+  .pg-to .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:#999;font-weight:600}
+  .pg-to .nm{font-family:var(--fD);font-size:14px;font-weight:700;margin-top:4px}
+  .pg-to .ln{font-size:11px;color:#555;line-height:1.55;white-space:pre-line;margin-top:2px}
+  table.it{width:100%;border-collapse:collapse;margin-bottom:16px}
+  table.it th{background:var(--accent);color:#fff;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:9px 11px;text-align:left}
+  table.it th.r,table.it td.r{text-align:right}
+  table.it td{padding:10px 11px;font-size:11.5px;border-bottom:1px solid #EEE;vertical-align:top}
+  table.it td.desc{font-weight:500;color:#1A1D26}
+  .totals{display:flex;justify-content:flex-end}
+  .totbox{width:46%;min-width:230px}
+  .totrow{display:flex;justify-content:space-between;padding:7px 0;font-size:12px;color:#555}
+  .totrow.grand{border-top:2px solid var(--accent);margin-top:5px;padding-top:11px;font-family:var(--fD);font-size:16px;font-weight:800;color:#1A1D26}
+  .totrow.grand .v{color:var(--accent)}
+  .pg-foot{margin-top:26px;padding-top:16px;border-top:1px solid #EEE}
+  .pg-foot .sec{margin-bottom:12px}
+  .pg-foot .sl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#999;font-weight:600;margin-bottom:3px}
+  .pg-foot .st{font-size:11px;color:#555;line-height:1.6;white-space:pre-line}
+  .pg-legal{font-size:10px;color:#999;text-align:center;margin-top:22px;padding-top:14px;border-top:1px solid #EEE;line-height:1.6}
+
+  .hintbar{text-align:center;font-size:12px;color:var(--muted);padding:0 22px 26px}
+
+  @media print{
+    body{background:#fff}
+    .topbar,.editor,.hintbar{display:none}
+    .layout{display:block}.preview-wrap{padding:0;overflow:visible}
+    .page{box-shadow:none;width:auto;min-height:auto;padding:14mm}
+  }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="brand">
+    <div class="mk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h4"/></svg></div>
+    <div><h1>Facturio</h1><p>Factures & devis professionnels</p></div>
+  </div>
+  <div class="acts">
+    <button class="btn btn-g" id="btnNew"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Nouveau</button>
+    <button class="btn btn-g" id="btnPrint"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg> Imprimer</button>
+    <button class="btn btn-p" id="btnPdf"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg> Télécharger le PDF</button>
+  </div>
+</div>
+
+<div class="layout">
+  <!-- EDITOR -->
+  <div class="editor">
+    <div class="seg" id="typeSeg"><button data-t="facture" class="on">Facture</button><button data-t="devis">Devis</button></div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/></svg> Votre entreprise</h2>
+      <div class="row logo-up">
+        <div class="logo-box" id="logoBox"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15l-5-5L5 21"/><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/></svg></div>
+        <div><label>Logo (optionnel)</label><input type="file" accept="image/*" id="logoInput" class="fld" style="padding:6px"></div>
+      </div>
+      <div class="row"><label>Nom / Raison sociale</label><input class="fld" data-k="from.name"></div>
+      <div class="row"><label>Adresse</label><textarea class="fld" data-k="from.addr"></textarea></div>
+      <div class="r2 row"><div><label>SIRET</label><input class="fld" data-k="from.siret"></div><div><label>N° TVA (si applicable)</label><input class="fld" data-k="from.vatId"></div></div>
+      <div class="r2 row"><div><label>Email</label><input class="fld" data-k="from.email"></div><div><label>Téléphone</label><input class="fld" data-k="from.phone"></div></div>
+    </div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg> Client</h2>
+      <div class="row"><label>Nom du client</label><input class="fld" data-k="to.name"></div>
+      <div class="row"><label>Adresse</label><textarea class="fld" data-k="to.addr"></textarea></div>
+      <div class="row"><label>Email</label><input class="fld" data-k="to.email"></div>
+    </div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg> Détails du document</h2>
+      <div class="row"><label>Numéro</label><input class="fld" data-k="number"></div>
+      <div class="r2 row"><div><label>Date d'émission</label><input type="date" class="fld" data-k="date"></div><div><label id="dueLbl">Échéance</label><input type="date" class="fld" data-k="due"></div></div>
+    </div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg> Prestations</h2>
+      <div class="items-head"><div>Description</div><div>Qté</div><div>P.U. HT</div><div>TVA%</div><div></div></div>
+      <div id="itemsList"></div>
+      <button class="add-item" id="addItem">+ Ajouter une ligne</button>
+    </div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M5 5l2 2M17 17l2 2M2 12h3M19 12h3M5 19l2-2M17 7l2-2"/></svg> Options</h2>
+      <div class="toggle-row"><div><div class="tl">Auto-entrepreneur</div><div class="ts">TVA non applicable, art. 293 B du CGI</div></div><button class="sw" id="swMicro"><span></span></button></div>
+      <div class="row" style="margin-top:12px"><label>Remise globale (%)</label><input type="number" min="0" max="100" step="1" class="fld" data-k="discount" value="0"></div>
+      <div class="row"><label>Couleur du document</label><div class="colors" id="colors"></div></div>
+    </div>
+
+    <div class="group">
+      <h2><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> Paiement & notes</h2>
+      <div class="r2 row"><div><label>IBAN</label><input class="fld" data-k="from.iban"></div><div><label>BIC</label><input class="fld" data-k="from.bic"></div></div>
+      <div class="row"><label>Conditions de paiement</label><input class="fld" data-k="terms"></div>
+      <div class="row"><label>Note de bas de page</label><textarea class="fld" data-k="notes"></textarea></div>
+    </div>
+  </div>
+
+  <!-- PREVIEW -->
+  <div>
+    <div class="preview-wrap"><div class="page" id="page"></div></div>
+    <div class="hintbar">Aperçu en temps réel · format A4 · tout est sauvegardé automatiquement dans votre navigateur</div>
+  </div>
+</div>
+
+<script>
+const ACCENTS=["#4F46E5","#0EA5A4","#0F172A","#E11D48","#D97706","#2563EB","#7C3AED","#15803D"];
+const todayISO=new Date().toISOString().slice(0,10);
+const DEFAULT={
+  type:"facture", number:"F-"+new Date().getFullYear()+"-001", date:todayISO, due:"",
+  from:{logo:"",name:"Studio Lumen",addr:"12 rue des Lilas\n31000 Toulouse, France",siret:"123 456 789 00012",vatId:"",email:"contact@studiolumen.fr",phone:"+33 6 12 34 56 78",iban:"FR76 1234 5678 9012 3456 7890 123",bic:""},
+  to:{name:"Café des Arts",addr:"4 place du Capitole\n31000 Toulouse",email:"gerant@cafedesarts.fr"},
+  items:[{desc:"Création site vitrine (5 pages)",qty:1,price:850,vat:20},{desc:"Optimisation référencement (SEO)",qty:1,price:250,vat:20},{desc:"Maintenance — forfait mensuel",qty:3,price:40,vat:20}],
+  discount:0, micro:false, accent:"#4F46E5",
+  terms:"Paiement à réception · 30 jours", notes:"Merci pour votre confiance."
+};
+let S=load()||JSON.parse(JSON.stringify(DEFAULT));
+
+function load(){try{const s=localStorage.getItem("facturio");return s?JSON.parse(s):null;}catch(e){return null;}}
+function save(){try{localStorage.setItem("facturio",JSON.stringify(S));}catch(e){}}
+function getK(k){return k.split(".").reduce((o,p)=>o&&o[p],S);}
+function setK(k,v){const ps=k.split(".");let o=S;for(let i=0;i<ps.length-1;i++)o=o[ps[i]];o[ps[ps.length-1]]=v;}
+function eur(n){return (Number(n)||0).toLocaleString("fr-FR",{minimumFractionDigits:2,maximumFractionDigits:2})+" €";}
+function frDate(iso){if(!iso)return "—";const[y,m,d]=iso.split("-");return d+"/"+m+"/"+y;}
+
+/* ---- calculs ---- */
+function compute(){
+  const subHT=S.items.reduce((a,it)=>a+(Number(it.qty)||0)*(Number(it.price)||0),0);
+  const disc=subHT*(Number(S.discount)||0)/100;
+  const factor=subHT>0?(subHT-disc)/subHT:1;
+  let vatMap={};
+  if(!S.micro){S.items.forEach(it=>{const ht=(Number(it.qty)||0)*(Number(it.price)||0)*factor;const r=Number(it.vat)||0;vatMap[r]=(vatMap[r]||0)+ht*r/100;});}
+  const vatTotal=Object.values(vatMap).reduce((a,b)=>a+b,0);
+  return {subHT,disc,htNet:subHT-disc,vatMap,vatTotal,ttc:subHT-disc+vatTotal};
+}
+
+/* ---- rendu éditeur (champs liés) ---- */
+function bindFields(){
+  document.querySelectorAll("[data-k]").forEach(el=>{
+    const k=el.dataset.k;const v=getK(k);if(v!==undefined&&v!==null)el.value=v;
+    el.addEventListener("input",()=>{setK(k,el.type==="number"?(el.value===""?0:parseFloat(el.value)):el.value);renderPreview();save();});
+  });
+}
+function renderItems(){
+  const wrap=document.getElementById("itemsList");
+  wrap.innerHTML=S.items.map((it,i)=>`<div class="item">
+    <input class="fld" data-i="${i}" data-f="desc" value="${(it.desc||'').replace(/"/g,'&quot;')}" placeholder="Description">
+    <input class="fld" type="number" min="0" step="1" data-i="${i}" data-f="qty" value="${it.qty}">
+    <input class="fld" type="number" min="0" step="0.01" data-i="${i}" data-f="price" value="${it.price}">
+    <input class="fld" type="number" min="0" step="1" data-i="${i}" data-f="vat" value="${it.vat}" ${S.micro?"disabled":""}>
+    <button class="del" data-del="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2m-9 0v14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6"/></svg></button>
+  </div>`).join("");
+  wrap.querySelectorAll("input").forEach(inp=>inp.addEventListener("input",()=>{const i=+inp.dataset.i,f=inp.dataset.f;S.items[i][f]=inp.type==="number"?(inp.value===""?0:parseFloat(inp.value)):inp.value;renderPreview();save();}));
+  wrap.querySelectorAll("[data-del]").forEach(b=>b.addEventListener("click",()=>{S.items.splice(+b.dataset.del,1);if(!S.items.length)S.items.push({desc:"",qty:1,price:0,vat:20});renderItems();renderPreview();save();}));
+}
+function renderColors(){document.getElementById("colors").innerHTML=ACCENTS.map(c=>`<button data-c="${c}" class="${S.accent===c?'on':''}" style="background:${c}"></button>`).join("");
+  document.querySelectorAll("#colors button").forEach(b=>b.onclick=()=>{S.accent=b.dataset.c;document.documentElement.style.setProperty("--accent",S.accent);renderColors();renderPreview();save();});}
+
+/* ---- rendu aperçu A4 ---- */
+function renderPreview(){
+  const c=compute(),f=S.from,t=S.to,A=S.accent;
+  const docTitle=S.type==="facture"?"Facture":"Devis";
+  const numLbl=S.type==="facture"?"Facture N°":"Devis N°";
+  const dueLbl=S.type==="facture"?"À régler avant le":"Valable jusqu'au";
+  const fromLines=[f.addr,f.siret?("SIRET "+f.siret):"",f.vatId?("TVA "+f.vatId):"",f.email,f.phone].filter(Boolean).join("\n");
+  const toLines=[t.addr,t.email].filter(Boolean).join("\n");
+  let vatRows="";
+  if(!S.micro){const keys=Object.keys(c.vatMap).sort((a,b)=>a-b);keys.forEach(r=>{vatRows+=`<div class="totrow"><span>TVA ${r} %</span><span>${eur(c.vatMap[r])}</span></div>`;});}
+  const items=S.items.map(it=>{const ht=(Number(it.qty)||0)*(Number(it.price)||0);return `<tr><td class="desc">${(it.desc||'').replace(/</g,'&lt;')||'—'}</td><td class="r">${it.qty}</td><td class="r">${eur(it.price)}</td>${S.micro?"":`<td class="r">${it.vat} %</td>`}<td class="r">${eur(ht)}</td></tr>`;}).join("");
+  const payInfo=[f.iban?("IBAN : "+f.iban):"",f.bic?("BIC : "+f.bic):""].filter(Boolean).join("\n");
+  document.getElementById("page").innerHTML=`
+    <div class="pg-head" style="border-color:${A}">
+      <div class="pg-from">
+        ${f.logo?`<img class="pg-logo" src="${f.logo}">`:""}
+        <div class="nm">${f.name||"Votre entreprise"}</div>
+        <div class="ln">${fromLines}</div>
+      </div>
+      <div class="pg-doc">
+        <div class="ttl" style="color:${A}">${docTitle}</div>
+        <div class="meta"><b>${numLbl}</b> ${S.number}<br>Émise le <b>${frDate(S.date)}</b>${S.due?`<br>${dueLbl} <b>${frDate(S.due)}</b>`:""}</div>
+      </div>
+    </div>
+    <div class="pg-to"><div class="lbl">${S.type==="facture"?"Facturé à":"Destinataire"}</div><div class="nm">${t.name||"—"}</div><div class="ln">${toLines}</div></div>
+    <table class="it"><thead><tr><th>Description</th><th class="r">Qté</th><th class="r">P.U. HT</th>${S.micro?"":'<th class="r">TVA</th>'}<th class="r">Total HT</th></tr></thead><tbody>${items}</tbody></table>
+    <div class="totals"><div class="totbox">
+      <div class="totrow"><span>Total HT</span><span>${eur(c.subHT)}</span></div>
+      ${c.disc>0?`<div class="totrow"><span>Remise (${S.discount} %)</span><span>− ${eur(c.disc)}</span></div>`:""}
+      ${vatRows}
+      <div class="totrow grand"><span>Total ${S.micro?"":"TTC"}</span><span class="v" style="color:${A}">${eur(c.ttc)}</span></div>
+    </div></div>
+    <div class="pg-foot">
+      ${payInfo?`<div class="sec"><div class="sl">Coordonnées bancaires</div><div class="st">${payInfo}</div></div>`:""}
+      ${S.terms?`<div class="sec"><div class="sl">Conditions</div><div class="st">${S.terms}</div></div>`:""}
+      ${S.notes?`<div class="st" style="margin-top:8px">${S.notes}</div>`:""}
+    </div>
+    ${S.micro?`<div class="pg-legal">TVA non applicable, article 293 B du Code général des impôts.</div>`:`<div class="pg-legal">Document généré avec Facturio</div>`}
+  `;
+}
+
+/* ---- interactions ---- */
+document.getElementById("typeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll("#typeSeg button").forEach(x=>x.classList.remove("on"));b.classList.add("on");
+  S.type=b.dataset.t;
+  S.number=(S.type==="facture"?"F-":"D-")+new Date().getFullYear()+"-001";
+  document.querySelector('[data-k="number"]').value=S.number;
+  document.getElementById("dueLbl").textContent=S.type==="facture"?"Échéance":"Validité";
+  renderPreview();save();
+});
+document.getElementById("addItem").onclick=()=>{S.items.push({desc:"",qty:1,price:0,vat:S.micro?0:20});renderItems();renderPreview();save();};
+document.getElementById("swMicro").onclick=()=>{S.micro=!S.micro;document.getElementById("swMicro").classList.toggle("on",S.micro);renderItems();renderPreview();save();};
+document.getElementById("logoInput").onchange=e=>{const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{S.from.logo=r.result;document.getElementById("logoBox").innerHTML=`<img src="${r.result}">`;renderPreview();save();};r.readAsDataURL(file);};
+document.getElementById("btnNew").onclick=()=>{if(confirm("Créer un nouveau document vierge ? (le document actuel sera remplacé)")){S=JSON.parse(JSON.stringify(DEFAULT));S.from={logo:"",name:"",addr:"",siret:"",vatId:"",email:"",phone:"",iban:"",bic:""};S.to={name:"",addr:"",email:""};S.items=[{desc:"",qty:1,price:0,vat:20}];initAll();save();}};
+document.getElementById("btnPrint").onclick=()=>window.print();
+document.getElementById("btnPdf").onclick=()=>{
+  const el=document.getElementById("page");
+  const name=(S.type==="facture"?"Facture":"Devis")+"_"+(S.number||"").replace(/\s/g,"")+".pdf";
+  if(window.html2pdf){
+    html2pdf().set({margin:0,filename:name,image:{type:"jpeg",quality:.98},html2canvas:{scale:2,useCORS:true,backgroundColor:"#fff"},jsPDF:{unit:"mm",format:"a4",orientation:"portrait"}}).from(el).save();
+  }else{window.print();}
+};
+
+function initAll(){
+  document.documentElement.style.setProperty("--accent",S.accent);
+  document.querySelectorAll("#typeSeg button").forEach(x=>x.classList.toggle("on",x.dataset.t===S.type));
+  document.getElementById("swMicro").classList.toggle("on",S.micro);
+  document.getElementById("dueLbl").textContent=S.type==="facture"?"Échéance":"Validité";
+  if(S.from.logo)document.getElementById("logoBox").innerHTML=`<img src="${S.from.logo}">`;
+  // (re)lier les champs en mettant à jour leurs valeurs
+  document.querySelectorAll("[data-k]").forEach(el=>{const v=getK(el.dataset.k);el.value=(v===undefined||v===null)?"":v;});
+  renderItems();renderColors();renderPreview();
+}
+bindFields();initAll();
+</script>
+</body>
+</html>
